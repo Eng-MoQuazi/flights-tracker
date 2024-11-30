@@ -1,0 +1,35 @@
+
+.nav {
+    background-color: rgb(37, 107, 21); 
+    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    padding: 10px 0;
+    margin: 0;
+    list-style-type: none; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  }
+  
+
+  .nav li {
+    display: inline-block;
+    font-size: 20px;
+    padding: 10px 20px;
+  }
+  
+  
+  .nav a {
+    text-decoration: none;
+    color: white; 
+    font-weight: bold; 
+    transition: all 0.3s ease; 
+  }
+  
+  
+  .nav a:hover {
+    color: white;
+    background-color: #449657; 
+    border-radius: 5px; 
+    padding: 5px 10px;
+  }
+  
