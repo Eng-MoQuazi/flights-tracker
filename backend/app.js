@@ -106,30 +106,85 @@ app.get("/api/dashboard", authenticateToken, async (req, res) => {
   res.json({ username: req.user.username, email: req.user.email });
 });
 
-//flight information from AS API
-app.get("/api/flights", authenticateToken, async (req, res) => {
-    const { flightNumber, date } = req.query;
-  
-    if (!flightNumber) {
-      return res.status(400).json({ error: "Flight number is required" });
+// public route: for unregister user
+app.get("/api/public-flights", async (req, res) => {
+  const { flightNumber } = req.query;
+
+  if (!flightNumber) {
+    return res.status(400).json({ error: "Flight number is required" });
+  }
+
+  try {
+    const response = await axios.get("http://api.aviationstack.com/v1/flights", {
+      params: {
+        access_key: AVIATIONSTACK_API_KEY,
+        flight_iata: flightNumber,
+      },
+    });
+
+    const flights = response.data.data;
+
+    if (!flights || flights.length === 0) {
+      return res.status(404).json({ error: "No flight found for the given number" });
     }
-  
-    try {
-      const response = await axios.get("http://api.aviationstack.com/v1/flights", {
-        params: {
-          access_key: AVIATIONSTACK_API_KEY,
-          flight_iata: flightNumber,
-          flight_date: date, 
-        },
-      });
-  
-      const flights = response.data.data; // get the information from API
-      res.json(flights);
-    } catch (error) {
-      console.error("Error fetching flight data:", error.message);
-      res.status(500).json({ error: "Failed to fetch flight data" });
+
+    // fetch back basic flight infomation
+    const basicInfo = flights.map((flight) => ({
+      flightNumber: flight.flight.iata,
+      departure: flight.departure.scheduled,
+      arrival: flight.arrival.scheduled,
+      status: flight.flight_status,
+    }));
+
+    res.json(basicInfo);
+  } catch (error) {
+    console.error("Error fetching flight data:", error.message);
+    res.status(500).json({ error: "Failed to fetch flight data" });
+  }
+});
+
+
+// protected route: for register user
+app.get("/api/protected-flights", authenticateToken, async (req, res) => {
+  const { flightNumber } = req.query;
+
+  if (!flightNumber) {
+    return res.status(400).json({ error: "Flight number is required" });
+  }
+
+  try {
+    const response = await axios.get("http://api.aviationstack.com/v1/flights", {
+      params: {
+        access_key: AVIATIONSTACK_API_KEY,
+        flight_iata: flightNumber,
+      },
+    });
+
+    const flights = response.data.data;
+
+    if (!flights || flights.length === 0) {
+      return res.status(404).json({ error: "No flight found for the given number" });
     }
-  });
+
+    // fetch the detail flight information
+    const detailedInfo = flights.map((flight) => ({
+      flightNumber: flight.flight.iata,
+      departure: flight.departure.scheduled,
+      arrival: flight.arrival.scheduled,
+      status: flight.flight_status,
+      departureAirport: flight.departure.airport,
+      arrivalAirport: flight.arrival.airport,
+      airline: flight.airline.name,
+    }));
+
+    res.json(detailedInfo);
+  } catch (error) {
+    console.error("Error fetching flight data:", error.message);
+    res.status(500).json({ error: "Failed to fetch flight data" });
+  }
+});
+
+
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
