@@ -111,7 +111,6 @@ function authenticateToken(req, res, next) {
 }
 
 //Protected Route: Dashboard
-// Protected Route: Dashboard
 app.get("/api/dashboard", authenticateToken, async (req, res) => {
   res.json({ username: req.user.username, email: req.user.email });
 });
@@ -132,21 +131,25 @@ app.get("/api/flights", authenticateToken, async (req, res) => {
       },
     });
 
+    // 检查 API 是否返回了航班数据
     if (!response.data.data || response.data.data.length === 0) {
       return res.status(404).json({ error: "Flight not found" });
     }
 
     const flight = response.data.data[0];
+    console.log("API Response:", flight);
+
+    // 动态提取经纬度信息
     const processedData = {
       departure: {
-        latitude: flight?.departure?.latitude,
-        longitude: flight?.departure?.longitude,
+        latitude: flight?.departure?.latitude || null,
+        longitude: flight?.departure?.longitude || null,
         airport: flight?.departure?.airport,
         scheduled: flight?.departure?.scheduled,
       },
       arrival: {
-        latitude: flight?.arrival?.latitude,
-        longitude: flight?.arrival?.longitude,
+        latitude: flight?.arrival?.latitude || null,
+        longitude: flight?.arrival?.longitude || null,
         airport: flight?.arrival?.airport,
         scheduled: flight?.arrival?.scheduled,
       },
@@ -160,6 +163,7 @@ app.get("/api/flights", authenticateToken, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch flight data" });
   }
 });
+
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
