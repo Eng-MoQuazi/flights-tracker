@@ -130,8 +130,7 @@ app.get("/api/flights", authenticateToken, async (req, res) => {
         flight_iata: flightNumber,
       },
     });
-
-    // 检查 API 是否返回了航班数据
+     
     if (!response.data.data || response.data.data.length === 0) {
       return res.status(404).json({ error: "Flight not found" });
     }
@@ -139,7 +138,7 @@ app.get("/api/flights", authenticateToken, async (req, res) => {
     const flight = response.data.data[0];
     console.log("API Response:", flight);
 
-    // 动态提取经纬度信息
+
     const processedData = {
       departure: {
         latitude: flight?.departure?.latitude || null,
