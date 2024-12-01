@@ -108,29 +108,48 @@ app.get("/api/dashboard", authenticateToken, async (req, res) => {
 
 //flight information from AS API
 app.get("/api/flights", authenticateToken, async (req, res) => {
-    const { flightNumber, date } = req.query;
-  
-    if (!flightNumber) {
-      return res.status(400).json({ error: "Flight number is required" });
-    }
-  
-    try {
-      const response = await axios.get("http://api.aviationstack.com/v1/flights", {
-        params: {
-          access_key: AVIATIONSTACK_API_KEY,
-          flight_iata: flightNumber,
-          flight_date: date, 
-        },
-      });
-  
-      const flights = response.data.data; // get the information from API
-      res.json(flights);
-    } catch (error) {
-      console.error("Error fetching flight data:", error.message);
-      res.status(500).json({ error: "Failed to fetch flight data" });
-    }
-  });
+  const { flightNumber } = req.query;
 
+  if (!flightNumber) {
+    return res.status(400).json({ error: "Flight number is required" });
+  }
+
+  try {
+    const response = await axios.get("http://api.aviationstack.com/v1/flights", {
+      params: {
+        access_key: AVIATIONSTACK_API_KEY,
+        flight_iata: flightNumber,
+      },
+    });
+
+    if (!response.data.data || response.data.data.length === 0) {
+      return res.status(404).json({ error: "Flight not found" });
+    }
+
+    const flight = response.data.data[0];
+    const processedData = {
+      departure: {
+        latitude: flight?.departure?.latitude,
+        longitude: flight?.departure?.longitude,
+        airport: flight?.departure?.airport,
+        scheduled: flight?.departure?.scheduled
+      },
+      arrival: {
+        latitude: flight?.arrival?.latitude,
+        longitude: flight?.arrival?.longitude,
+        airport: flight?.arrival?.airport,
+        scheduled: flight?.arrival?.scheduled
+      },
+      flight_status: flight?.flight_status,
+      live: flight?.live
+    };
+    
+    res.json(processedData);
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).json({ error: "Failed to fetch flight data" });
+  }
+});
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
