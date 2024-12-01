@@ -17,9 +17,9 @@ const Dashboard = () => {
           'Authorization': `Bearer ${token}`
         }
       })
-      .then(res => res.json())
-      .then(data => setUsername(data.username))
-      .catch(err => setError('Error fetching user data'));
+        .then(res => res.json())
+        .then(data => setUsername(data.username))
+        .catch(err => setError('Error fetching user data'));
     }
   }, []);
 
@@ -27,7 +27,7 @@ const Dashboard = () => {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`/api/flights?flightNumber=${flightNumber}`, {
@@ -35,11 +35,11 @@ const Dashboard = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (!response.ok) {
         throw new Error(response.status === 404 ? 'Flight not found' : 'Failed to fetch flight data');
       }
-      
+
       const data = await response.json();
       setFlightData(data);
       setShowMap(true);
@@ -56,7 +56,7 @@ const Dashboard = () => {
       <div className="welcome-section">
         <h1>Welcome, {username}</h1>
       </div>
-      
+
       <div className="search-section">
         <form onSubmit={handleSearch}>
           <input
