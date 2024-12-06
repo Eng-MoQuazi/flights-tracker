@@ -15,10 +15,9 @@ app.use(express.json());
 
 const SECRET_KEY = process.env.JWT_SECRET; 
 const AVIATIONSTACK_API_KEY = process.env.AVIATIONSTACK_API_KEY;
-let db; //MongoDB database // MongoDB database
-let usersCollection; //collection of user // Collection of users
+let db; //MongoDB database
+let usersCollection; //collection of user
 
-//Connect to MongoDB
 // Connect to MongoDB
 (async () => {
    db = await connectDB();
@@ -27,15 +26,12 @@ let usersCollection; //collection of user // Collection of users
 
 const PORT = process.env.PORT || 3000;
 
-//Create User Registration Route
 // Create User Registration Route
 app.post("/register", async (req, res) => {
    const { username, password, email } = req.body;
  
    try {
      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // insert data to MongoDB
  
     // Insert data to MongoDB
     await usersCollection.insertOne({
@@ -52,8 +48,6 @@ app.post("/register", async (req, res) => {
   });
   
 
-
-//Create Login Route
 // Create Login Route
 app.post("/login", async (req, res) => {
    const { username, password } = req.body;
@@ -64,14 +58,12 @@ app.post("/login", async (req, res) => {
        return res.status(400).json("Invalid credentials");
      }
  
-      // Validate password
      // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
      if (!isPasswordValid) {
        return res.status(400).json("Invalid credentials");
      }
  
-      // generate JWT
      // Generate JWT
     const token = jwt.sign(
        { username: user.username, email: user.email },
@@ -84,8 +76,7 @@ app.post("/login", async (req, res) => {
    }
   });
 
-  
-//Protect Routes - Middleware for JWT Verification
+
 // Protect Routes - Middleware for JWT Verification
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"]; // get Authorization Header
@@ -115,8 +106,9 @@ app.get("/api/dashboard", authenticateToken, async (req, res) => {
   res.json({ username: req.user.username, email: req.user.email });
 });
 
-// Flight information from AviationStack API
-app.get("/api/flights", authenticateToken, async (req, res) => {
+//flight information from AS API
+// public route: for unregister user
+app.get("/api/public-flights", async (req, res) => {
   const { flightNumber } = req.query;
 
   if (!flightNumber) {
@@ -130,35 +122,65 @@ app.get("/api/flights", authenticateToken, async (req, res) => {
         flight_iata: flightNumber,
       },
     });
-     
-    if (!response.data.data || response.data.data.length === 0) {
-      return res.status(404).json({ error: "Flight not found" });
+
+    const flights = response.data.data;
+
+    if (!flights || flights.length === 0) {
+      return res.status(404).json({ error: "No flight found for the given number" });
     }
 
-    const flight = response.data.data[0];
-    console.log("API Response:", flight);
+    // fetch back basic flight infomation
+    const basicInfo = flights.map((flight) => ({
+      flightNumber: flight.flight.iata,
+      departure: flight.departure.scheduled,
+      arrival: flight.arrival.scheduled,
+      status: flight.flight_status,
+      airline: flight.airline.name
+    }));
 
-
-    const processedData = {
-      departure: {
-        latitude: flight?.departure?.latitude || null,
-        longitude: flight?.departure?.longitude || null,
-        airport: flight?.departure?.airport,
-        scheduled: flight?.departure?.scheduled,
-      },
-      arrival: {
-        latitude: flight?.arrival?.latitude || null,
-        longitude: flight?.arrival?.longitude || null,
-        airport: flight?.arrival?.airport,
-        scheduled: flight?.arrival?.scheduled,
-      },
-      flight_status: flight?.flight_status,
-      live: flight?.live,
-    };
-
-    res.json(processedData);
+    res.json(basicInfo);
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error("Error fetching flight data:", error.message);
+    res.status(500).json({ error: "Failed to fetch flight data" });
+  }
+});
+
+// protected route: for register user
+app.get("/api/protected-flights", authenticateToken, async (req, res) => {
+  const { flightNumber } = req.query;
+
+  if (!flightNumber) {
+    return res.status(400).json({ error: "Flight number is required" });
+  }
+
+  try {
+    const response = await axios.get("http://api.aviationstack.com/v1/flights", {
+      params: {
+        access_key: AVIATIONSTACK_API_KEY,
+        flight_iata: flightNumber,
+      },
+    });
+
+    const flights = response.data.data;
+
+    if (!flights || flights.length === 0) {
+      return res.status(404).json({ error: "No flight found for the given number" });
+    }
+
+    // fetch the detail flight information
+    const detailedInfo = flights.map((flight) => ({
+      flightNumber: flight.flight.iata,
+      departure: flight.departure.scheduled,
+      arrival: flight.arrival.scheduled,
+      status: flight.flight_status,
+      departureAirport: flight.departure.airport,
+      arrivalAirport: flight.arrival.airport,
+      airline: flight.airline.name,
+    }));
+
+    res.json(detailedInfo);
+  } catch (error) {
+    console.error("Error fetching flight data:", error.message);
     res.status(500).json({ error: "Failed to fetch flight data" });
   }
 });
@@ -167,7 +189,7 @@ app.get("/api/flights", authenticateToken, async (req, res) => {
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// Start the server
+//start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
