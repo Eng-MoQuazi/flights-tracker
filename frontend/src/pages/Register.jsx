@@ -17,26 +17,31 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); 
     try {
-      const response = await fetch("http://localhost:3000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData), 
+        }
+      );
+  
       if (response.ok) {
-        setMessage("Registration successful! You can now login.");
-        setFormData({ username: "", email: "", password: "" });
-        navigate("/login");
+        const responseData = await response.json();
+        setMessage(responseData.message || "Registration successful! You can now login.");
+        setFormData({ username: "", email: "", password: "" }); //clear the form
+        navigate("/login"); //direct to the login page
       } else {
         const errorData = await response.json();
-        setMessage("Registration failed: " + errorData.error);
+        setMessage("Registration failed: " + (errorData.error || "Unknown error"));
       }
     } catch (error) {
-      setMessage("An error occurred. Please try again later.");
+      setMessage("An error occurred. Please try again later.");//error handling
     }
   };
+  
 
   return (
     <div className="register-container">
