@@ -5,7 +5,7 @@ import "./Dashboard.css";
 const Dashboard = () => {
   const [flightNumber, setFlightNumber] = useState(""); 
   const [searchResult, setSearchResult] = useState(null);
-  const [error, setError] = useState(""); /
+  const [error, setError] = useState(""); 
   const [message, setMessage] = useState(""); 
 
   const location = useLocation();
