@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Dashboard.css";
 
 const Dashboard = () => {
   const [flightNumber, setFlightNumber] = useState(""); // state for the search input
   const [searchResult, setSearchResult] = useState(null); // state to store flight details
   const [error, setError] = useState("");
+  
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname === "/dashboard") {
+      setSearchResult(null); // clear search result
+      setFlightNumber("");   // clear text field
+      setError("");          // clear err msg
+    }
+  }, [location.pathname]);
 
   const handleSearch = async () => {
     if (!flightNumber) {
@@ -14,18 +25,19 @@ const Dashboard = () => {
     }
 
     try {
-      const token = localStorage.getItem("token"); // Check if user is logged in
+      const token = localStorage.getItem("token");
       const isLoggedIn = !!token;
+      const BASE_URL = import.meta.env.VITE_BACKEND_API_URL; //replace api when deploy
 
       const endpoint = isLoggedIn
-        ? "http://localhost:3000/api/protected-flights" // Use Protected Route if logged in
-        : "http://localhost:3000/api/public-flights";   // Use Public Route if not logged in
+      ? `${BASE_URL}/api/protected-flights`
+      : `${BASE_URL}/api/public-flights`;
 
       const options = {
         method: "GET",
         headers: isLoggedIn
           ? {
-              Authorization: `Bearer ${token}`, // Include token for protected route
+              Authorization: `Bearer ${token}`,
             }
           : {},
       };
@@ -42,6 +54,34 @@ const Dashboard = () => {
       setError(error.message);
       setSearchResult(null);
     }
+  };
+
+  const handleAddToMyFlights = async (flight) => {
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Token:", token); // 確認是否成功獲取 Token
+  
+      const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  
+      const response = await fetch(`${BASE_URL}/api/my-flights`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // 確保 Header 包含 Token
+        },
+        body: JSON.stringify(flight),
+      });
+  
+      if (response.ok) {
+        alert("Flight added successfully!");
+      } else {
+        throw new Error("Failed to add flight");
+      }
+    } catch (error) {
+      console.error("Error adding flight:", error.message);
+    }
+  };
+  
   };
 
   return (
@@ -61,6 +101,16 @@ const Dashboard = () => {
         />
         <button onClick={handleSearch} className="search-button">
           Search
+        </button>
+        <button
+          onClick={() => {
+            setSearchResult(null);
+            setFlightNumber("");
+            setError("");
+          }}
+          className="clear-button"
+        >
+          Clear
         </button>
       </div>
 
@@ -85,6 +135,7 @@ const Dashboard = () => {
                   <p><strong>Arrival Airport:</strong> {flight.arrivalAirport}</p>
                 )}
                 <p><strong>Airline:</strong> {flight.airline}</p>
+                <button onClick={() => handleAddToMyFlights(flight)}>Add to My Flights</button>
               </div>
             ))
           ) : (
@@ -98,9 +149,13 @@ const Dashboard = () => {
         <Link to="/add-flight" className="dashboard-link">
           Add a New Flight
         </Link>
+        <Link to="/my-flights" className="my-flights-link">
+          View My Flights
+        </Link>
       </div>
     </div>
   );
-};
+
+
 
 export default Dashboard;

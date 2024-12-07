@@ -9,7 +9,12 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.NODE_ENV === "production" ? "https://flights-tracker-mbim.onrender.com" : "http://localhost:5173",
+};
+
+app.use(cors(corsOptions));
+
 
 app.use(express.json());
 
@@ -72,7 +77,12 @@ app.post("/login", async (req, res) => {
      );
      res.json({ token });
    } catch (error) {
-     res.status(500).json("Error logging in: " + error.message);
+    res.status(500).json({
+      error: true,
+      message: "Failed to fetch flight data",
+      details: error.message,
+    });
+    
    }
   });
 
@@ -81,6 +91,7 @@ app.post("/login", async (req, res) => {
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"]; // get Authorization Header
   const token = authHeader && authHeader.split(" ")[1]; // get the token after the Bearer
+
 
   console.log("Token received:", token);//print token(testing)
   console.log("JWT Secret Key:", SECRET_KEY);//print secret key (testing)
@@ -141,7 +152,12 @@ app.get("/api/public-flights", async (req, res) => {
     res.json(basicInfo);
   } catch (error) {
     console.error("Error fetching flight data:", error.message);
-    res.status(500).json({ error: "Failed to fetch flight data" });
+    res.status(500).json({
+      error: true,
+      message: "Failed to fetch flight data",
+      details: error.message,
+    });
+    
   }
 });
 
@@ -181,9 +197,110 @@ app.get("/api/protected-flights", authenticateToken, async (req, res) => {
     res.json(detailedInfo);
   } catch (error) {
     console.error("Error fetching flight data:", error.message);
-    res.status(500).json({ error: "Failed to fetch flight data" });
+    res.status(500).json({
+      error: true,
+      message: "Failed to fetch flight data",
+      details: error.message,
+    });
+    
   }
 });
+
+// add flight to "my flight"
+app.post("/api/my-flights", authenticateToken, async (req, res) => {
+  const { flightNumber, status, departure, arrival, airline } = req.body;
+  const username = req.user.username;
+
+  try {
+    await usersCollection.updateOne(
+      { username },
+      {
+        $push: {
+          myFlights: { flightNumber, status, departure, arrival, airline },
+        },
+      }
+    );
+    res.status(200).json({ message: "Flight added successfully" });
+  } catch (error) {
+    res.status(500).json({
+      error: true,
+      message: "Failed to fetch flight data",
+      details: error.message,
+    });
+    
+  }
+});
+
+
+
+// get user's "my flight" list
+app.get("/api/my-flights", authenticateToken, async (req, res) => {
+  const username = req.user.username;
+
+  try {
+    const user = await usersCollection.findOne({ username });
+    res.status(200).json(user.myFlights || []);
+  } catch (error) {
+    res.status(500).json({
+      error: true,
+      message: "Failed to fetch flight data",
+      details: error.message,
+    });
+    
+  }
+});
+
+
+// remove flight from "my flight"
+app.delete("/api/my-flights", authenticateToken, async (req, res) => {
+  const { flightNumber } = req.body;
+  const username = req.user.username;
+
+  try {
+    await usersCollection.updateOne(
+      { username },
+      { $pull: { myFlights: { flightNumber } } }
+    );
+    res.status(200).json({ message: "Flight removed successfully" });
+  } catch (error) {
+    res.status(500).json({
+      error: true,
+      message: "Failed to fetch flight data",
+      details: error.message,
+    });
+    
+  }
+});
+
+// update flight information
+app.put("/api/my-flights", authenticateToken, async (req, res) => {
+  const { flightNumber, status, departure, arrival, airline } = req.body;
+  const username = req.user.username;
+
+  try {
+    await usersCollection.updateOne(
+      { username, "myFlights.flightNumber": flightNumber },
+      {
+        $set: {
+          "myFlights.$.status": status,
+          "myFlights.$.departure": departure,
+          "myFlights.$.arrival": arrival,
+          "myFlights.$.airline": airline,
+        },
+      }
+    );
+    res.status(200).json({ message: "Flight updated successfully" });
+  } catch (error) {
+    res.status(500).json({
+      error: true,
+      message: "Failed to fetch flight data",
+      details: error.message,
+    });
+    
+  }
+});
+
+
 
 
 // Serve static files

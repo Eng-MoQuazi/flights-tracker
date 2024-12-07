@@ -15,7 +15,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/register`, { //replace "VITE_API_BASE_URL" when deploy
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

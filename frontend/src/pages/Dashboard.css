@@ -6,7 +6,8 @@ body {
 }
 
 .dashboard-container {
-  max-width: 700px;
+  max-width: 1200px;
+  width: 700px;
   margin: 80px auto;
   padding: 30px;
   text-align: center;
@@ -87,5 +88,20 @@ p {
   padding: 15px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  background-color: #f9f9f9;
+  background-color: #dcecf7;
+}
+
+.clear-button {
+  margin-top: 10px;
+  margin-left: 20px;;
+  background-color: #1e77bd;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.clear-button:hover {
+  color: #0056b3;
+  background-color: #cbe6f9;
 }

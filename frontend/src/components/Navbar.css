@@ -1,6 +1,7 @@
 
 .nav {
     background-color: rgb(37, 107, 21); 
+    width:100%;
     display: flex; 
     justify-content: center;
     align-items: center; 

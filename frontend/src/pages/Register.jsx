@@ -20,7 +20,7 @@ const Register = () => {
     e.preventDefault(); 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/register`,
+        `${import.meta.env.VITE_BACKEND_API_URL}/register`, //replace "VITE_API_BASE_URL" when deploy
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
