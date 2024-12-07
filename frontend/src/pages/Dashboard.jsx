@@ -82,7 +82,7 @@ const Dashboard = () => {
     }
   };
   
-  };
+
 
   return (
     <div className="dashboard-container">
@@ -155,6 +155,7 @@ const Dashboard = () => {
       </div>
     </div>
   );
+};
 
 
 
