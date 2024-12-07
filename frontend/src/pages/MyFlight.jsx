@@ -29,7 +29,8 @@ const MyFlights = () => {
   const handleRemoveFlight = async (flightNumber) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/api/my-flights`, { ////replace "VITE_API_BASE_URL" when deploy
+      const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+      const response = await fetch(`${BASE_URL}/api/my-flights`, { ////replace "VITE_API_BASE_URL" when deploy
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +41,7 @@ const MyFlights = () => {
 
       if (response.ok) {
         alert("Flight removed successfully");
-        fetchMyFlights(); 
+        setMyFlights((prev) => prev.filter(flight => flight.flightNumber !== flightNumber));
       } else {
         throw new Error("Failed to remove flight");
       }

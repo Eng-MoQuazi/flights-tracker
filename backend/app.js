@@ -8,12 +8,11 @@ const connectDB = require("./database");
 const cors = require("cors");
 
 const app = express();
-
 const corsOptions = {
-  origin: process.env.NODE_ENV === "production" ? "https://flights-tracker-mbim.onrender.com" : "http://localhost:5173",
+  origin: ["https://flights-tracker-mbim.onrender.com", "http://localhost:5173"],
 };
-
 app.use(cors(corsOptions));
+
 
 
 app.use(express.json());
@@ -163,6 +162,8 @@ app.get("/api/public-flights", async (req, res) => {
 
 // protected route: for register user
 app.get("/api/protected-flights", authenticateToken, async (req, res) => {
+  console.log("Request received on /api/protected-flights");
+  console.log("Query params:", req.query);
   const { flightNumber } = req.query;
 
   if (!flightNumber) {

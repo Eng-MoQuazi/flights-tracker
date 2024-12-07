@@ -15,24 +15,30 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/register`, { //replace "VITE_API_BASE_URL" when deploy
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/login`, { //replace the uri
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
+  
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("token", data.token); //store token
-        setMessage("Login successful!");
-        navigate("/");
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          setMessage("Login successful!");
+          navigate("/");
+        } else {
+          setMessage("Login successful, but no token received!");
+        }
       } else {
-        setMessage("Invalid credentials. Please try again.");
+        const errorData = await response.json();
+        setMessage(errorData.error || "Invalid credentials. Please try again.");
       }
     } catch (error) {
       setMessage("An error occurred. Please try again later.");
     }
   };
+  
 
   return (
     <div className="login-container">

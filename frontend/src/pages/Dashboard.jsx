@@ -3,18 +3,19 @@ import { Link, useLocation } from "react-router-dom";
 import "./Dashboard.css";
 
 const Dashboard = () => {
-  const [flightNumber, setFlightNumber] = useState(""); // state for the search input
-  const [searchResult, setSearchResult] = useState(null); // state to store flight details
-  const [error, setError] = useState("");
-  
+  const [flightNumber, setFlightNumber] = useState(""); // 搜索輸入框的狀態
+  const [searchResult, setSearchResult] = useState(null); // 搜索結果的狀態
+  const [error, setError] = useState(""); // 錯誤信息的狀態
+  const [message, setMessage] = useState(""); // **新增的狀態，用於顯示反饋信息**
 
   const location = useLocation();
 
   useEffect(() => {
     if (location.pathname === "/dashboard") {
-      setSearchResult(null); // clear search result
-      setFlightNumber("");   // clear text field
-      setError("");          // clear err msg
+      setSearchResult(null); // 清空搜索結果
+      setFlightNumber(""); // 清空搜索框
+      setError(""); // 清空錯誤信息
+      setMessage(""); // **清空消息狀態**
     }
   }, [location.pathname]);
 
@@ -27,11 +28,11 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const isLoggedIn = !!token;
-      const BASE_URL = import.meta.env.VITE_BACKEND_API_URL; //replace api when deploy
+      const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
 
       const endpoint = isLoggedIn
-      ? `${BASE_URL}/api/protected-flights`
-      : `${BASE_URL}/api/public-flights`;
+        ? `${BASE_URL}/api/protected-flights`
+        : `${BASE_URL}/api/public-flights`;
 
       const options = {
         method: "GET",
@@ -42,14 +43,18 @@ const Dashboard = () => {
           : {},
       };
 
-      const response = await fetch(`${endpoint}?flightNumber=${flightNumber}`, options);
+      const response = await fetch(
+        `${endpoint}?flightNumber=${flightNumber}`,
+        options
+      );
+
       if (!response.ok) {
         throw new Error("Flight not found or unauthorized!");
       }
 
       const data = await response.json();
       setSearchResult(data);
-      setError("");
+      setError(""); // 清空錯誤
     } catch (error) {
       setError(error.message);
       setSearchResult(null);
@@ -59,35 +64,34 @@ const Dashboard = () => {
   const handleAddToMyFlights = async (flight) => {
     try {
       const token = localStorage.getItem("token");
-      console.log("Token:", token); // 確認是否成功獲取 Token
-  
       const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  
+
       const response = await fetch(`${BASE_URL}/api/my-flights`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // 確保 Header 包含 Token
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(flight),
       });
-  
+
       if (response.ok) {
-        alert("Flight added successfully!");
+        setMessage("Flight added successfully!"); // **成功時更新消息狀態**
       } else {
         throw new Error("Failed to add flight");
       }
     } catch (error) {
-      console.error("Error adding flight:", error.message);
+      setMessage(error.message); // **出錯時更新消息狀態**
     }
-  };
-  
   };
 
   return (
     <div className="dashboard-container">
       <h1>Welcome to Flight Tracker</h1>
       <p>Track your flights and manage your travel with ease!</p>
+
+      {/* 顯示反饋消息 */}
+      {message && <p className="feedback-message">{message}</p>}
 
       {/* Search by Flight Number */}
       <div className="search-section">
@@ -107,6 +111,7 @@ const Dashboard = () => {
             setSearchResult(null);
             setFlightNumber("");
             setError("");
+            setMessage(""); // **清空消息狀態**
           }}
           className="clear-button"
         >
@@ -124,18 +129,24 @@ const Dashboard = () => {
           {Array.isArray(searchResult) ? (
             searchResult.map((flight, index) => (
               <div key={index}>
-                <p><strong>Flight Number:</strong> {flight.flightNumber}</p>
-                <p><strong>Status:</strong> {flight.status}</p>
-                <p><strong>Departure:</strong> {flight.departure}</p>
-                <p><strong>Arrival:</strong> {flight.arrival}</p>
-                {flight.departureAirport && (
-                  <p><strong>Departure Airport:</strong> {flight.departureAirport}</p>
-                )}
-                {flight.arrivalAirport && (
-                  <p><strong>Arrival Airport:</strong> {flight.arrivalAirport}</p>
-                )}
-                <p><strong>Airline:</strong> {flight.airline}</p>
-                <button onClick={() => handleAddToMyFlights(flight)}>Add to My Flights</button>
+                <p>
+                  <strong>Flight Number:</strong> {flight.flightNumber}
+                </p>
+                <p>
+                  <strong>Status:</strong> {flight.status}
+                </p>
+                <p>
+                  <strong>Departure:</strong> {flight.departure}
+                </p>
+                <p>
+                  <strong>Arrival:</strong> {flight.arrival}
+                </p>
+                <button
+                  onClick={() => handleAddToMyFlights(flight)}
+                  className="add-flight-button"
+                >
+                  Add to My Flights
+                </button>
               </div>
             ))
           ) : (
@@ -155,7 +166,6 @@ const Dashboard = () => {
       </div>
     </div>
   );
-
-
+};
 
 export default Dashboard;

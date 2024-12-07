@@ -17,30 +17,28 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_API_URL}/register`, //replace "VITE_API_BASE_URL" when deploy
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData), 
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
   
       if (response.ok) {
         const responseData = await response.json();
         setMessage(responseData.message || "Registration successful! You can now login.");
-        setFormData({ username: "", email: "", password: "" }); //clear the form
-        navigate("/login"); //direct to the login page
+        setTimeout(() => navigate("/login"), 3000); // 延遲3秒再跳轉
+        setFormData({ username: "", email: "", password: "" }); // 清空表單
       } else {
         const errorData = await response.json();
-        setMessage("Registration failed: " + (errorData.error || "Unknown error"));
+        setMessage(errorData.error || "An unexpected error occurred. Please try again.");
       }
     } catch (error) {
-      setMessage("An error occurred. Please try again later.");//error handling
+      setMessage("An error occurred. Please try again later.");
     }
   };
+  
   
 
   return (

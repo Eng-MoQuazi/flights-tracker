@@ -105,3 +105,15 @@ p {
   color: #0056b3;
   background-color: #cbe6f9;
 }
+
+.feedback-message {
+  background-color: #d4edda; /* 成功提示綠色背景 */
+  color: #155724; /* 成功文字顏色 */
+  border: 1px solid #c3e6cb;
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 16px;
+}
+
