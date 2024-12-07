@@ -3,19 +3,19 @@ import { Link, useLocation } from "react-router-dom";
 import "./Dashboard.css";
 
 const Dashboard = () => {
-  const [flightNumber, setFlightNumber] = useState(""); // 搜索輸入框的狀態
-  const [searchResult, setSearchResult] = useState(null); // 搜索結果的狀態
-  const [error, setError] = useState(""); // 錯誤信息的狀態
-  const [message, setMessage] = useState(""); // **新增的狀態，用於顯示反饋信息**
+  const [flightNumber, setFlightNumber] = useState(""); 
+  const [searchResult, setSearchResult] = useState(null);
+  const [error, setError] = useState(""); /
+  const [message, setMessage] = useState(""); 
 
   const location = useLocation();
 
   useEffect(() => {
     if (location.pathname === "/dashboard") {
-      setSearchResult(null); // 清空搜索結果
-      setFlightNumber(""); // 清空搜索框
-      setError(""); // 清空錯誤信息
-      setMessage(""); // **清空消息狀態**
+      setSearchResult(null); // clear result
+      setFlightNumber(""); // clear text field
+      setError(""); // clear err msg
+      setMessage(""); // clear msg
     }
   }, [location.pathname]);
 
@@ -54,7 +54,7 @@ const Dashboard = () => {
 
       const data = await response.json();
       setSearchResult(data);
-      setError(""); // 清空錯誤
+      setError(""); // clear err
     } catch (error) {
       setError(error.message);
       setSearchResult(null);
@@ -76,12 +76,12 @@ const Dashboard = () => {
       });
 
       if (response.ok) {
-        setMessage("Flight added successfully!"); // **成功時更新消息狀態**
+        setMessage("Flight added successfully!"); // **success msg**
       } else {
         throw new Error("Failed to add flight");
       }
     } catch (error) {
-      setMessage(error.message); // **出錯時更新消息狀態**
+      setMessage(error.message); // **err msg**
     }
   };
 
@@ -90,7 +90,7 @@ const Dashboard = () => {
       <h1>Welcome to Flight Tracker</h1>
       <p>Track your flights and manage your travel with ease!</p>
 
-      {/* 顯示反饋消息 */}
+      {/* msg */}
       {message && <p className="feedback-message">{message}</p>}
 
       {/* Search by Flight Number */}
@@ -162,7 +162,7 @@ const Dashboard = () => {
         </Link>
         <Link to="/my-flights" className="my-flights-link">
           View My Flights
-        </Link>
+        </Link> 
       </div>
     </div>
   );
