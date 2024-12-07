@@ -8,10 +8,8 @@ const connectDB = require("./database");
 const cors = require("cors");
 
 const app = express();
-const corsOptions = {
-  origin: ["https://flights-tracker-mbim.onrender.com", "http://localhost:5173"],
-};
-app.use(cors(corsOptions));
+
+app.use(cors());
 
 
 
@@ -24,9 +22,16 @@ let usersCollection; //collection of user
 
 // Connect to MongoDB
 (async () => {
-   db = await connectDB();
-   usersCollection = db.collection("user"); //to store the user's data // To store the user's data
+  try {
+    db = await connectDB();
+    usersCollection = db.collection("user");
+    console.log("Database connected successfully");
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+    process.exit(1);
+  }
 })();
+
 
 const PORT = process.env.PORT || 3000;
 
@@ -211,6 +216,7 @@ app.get("/api/protected-flights", authenticateToken, async (req, res) => {
 app.post("/api/my-flights", authenticateToken, async (req, res) => {
   const { flightNumber, status, departure, arrival, airline } = req.body;
   const username = req.user.username;
+  console.log("Authenticated user:", req.user);
 
   try {
     await usersCollection.updateOne(

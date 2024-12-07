@@ -28,7 +28,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
       const isLoggedIn = !!token;
-      const BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
+      const BASE_URL = "http://localhost:3000";
 
       const endpoint = isLoggedIn
         ? `${BASE_URL}/api/protected-flights`
@@ -64,8 +64,8 @@ const Dashboard = () => {
   const handleAddToMyFlights = async (flight) => {
     try {
       const token = localStorage.getItem("token");
-      const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
+      const BASE_URL = "http://localhost:5000"; // 確保這行正確引用環境變量
+  
       const response = await fetch(`${BASE_URL}/api/my-flights`, {
         method: "POST",
         headers: {
@@ -74,16 +74,17 @@ const Dashboard = () => {
         },
         body: JSON.stringify(flight),
       });
-
+  
       if (response.ok) {
-        setMessage("Flight added successfully!"); // **success msg**
+        setMessage("Flight added successfully!");
       } else {
         throw new Error("Failed to add flight");
       }
     } catch (error) {
-      setMessage(error.message); // **err msg**
+      setMessage(error.message);
     }
   };
+  
 
   return (
     <div className="dashboard-container">
