@@ -135,6 +135,8 @@ app.get("/api/public-flights", async (req, res) => {
       departure: flight.departure.scheduled,
       arrival: flight.arrival.scheduled,
       status: flight.flight_status,
+      longitude: flight.live?.longitude || null,
+      latitude: flight.live?.latitude || null,
     }));
 
     res.json(basicInfo);
@@ -175,6 +177,8 @@ app.get("/api/protected-flights", authenticateToken, async (req, res) => {
       departureAirport: flight.departure.airport,
       arrivalAirport: flight.arrival.airport,
       airline: flight.airline.name,
+      longitude: flight.live?.longitude || null,
+      latitude: flight.live?.latitude || null,
     }));
 
     res.json(detailedInfo);

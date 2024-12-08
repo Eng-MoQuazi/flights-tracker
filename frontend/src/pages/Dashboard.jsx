@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import L from "leaflet";
 import "./Dashboard.css";
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
@@ -8,6 +9,7 @@ const Dashboard = () => {
   const [flightNumber, setFlightNumber] = useState(""); // search field
   const [searchResult, setSearchResult] = useState(null); // search result
   const [error, setError] = useState(""); // err msg
+  const [map, setMap] = useState(null); // Map instance
 
   // search flight
   const handleSearch = async () => {
@@ -71,6 +73,32 @@ const Dashboard = () => {
     }
   };
 
+  useEffect(() => {
+    if (map) {
+      map.remove(); // Clear the map before rendering a new one
+      setMap(null);
+    }
+
+    // Initialize the map if the flight is active
+    if (searchResult && searchResult[0]?.status === "active") {
+      const { longitude, latitude } = searchResult[0];
+      if (longitude && latitude) {
+        const newMap = L.map("map").setView([latitude, longitude], 10);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "© OpenStreetMap contributors",
+        }).addTo(newMap);
+
+        L.marker([latitude, longitude]).addTo(newMap)
+          .bindPopup("Flight Location")
+          .openPopup();
+
+        setMap(newMap); // Store the map instance
+      }
+    }
+  }, [searchResult]);
+
   return (
     <div className="dashboard-container">
       <h1>Welcome to Flight Tracker</h1>
@@ -120,6 +148,11 @@ const Dashboard = () => {
             <p>No flight data available.</p>
           )}
         </div>
+      )}
+
+      {/* Map Display */}
+      {searchResult && searchResult[0]?.status === "active" && (
+        <div id="map" style={{ height: "400px", width: "100%", marginTop: "20px" }}></div>
       )}
 
       {}
