@@ -11,8 +11,6 @@ const app = express();
 
 app.use(cors());
 
-
-
 app.use(express.json());
 
 const SECRET_KEY = process.env.JWT_SECRET; 
@@ -20,82 +18,69 @@ const AVIATIONSTACK_API_KEY = process.env.AVIATIONSTACK_API_KEY;
 let db; //MongoDB database
 let usersCollection; //collection of user
 
-// Connect to MongoDB
+//Connect to MongoDB
 (async () => {
-  try {
-    db = await connectDB();
-    usersCollection = db.collection("user");
-    console.log("Database connected successfully");
-  } catch (error) {
-    console.error("Database connection failed:", error.message);
-    process.exit(1);
-  }
+  db = await connectDB();
+  usersCollection = db.collection("user"); //to store the user's data
 })();
-
 
 const PORT = process.env.PORT || 3000;
 
-// Create User Registration Route
+//Create User Registration Route
 app.post("/register", async (req, res) => {
-   const { username, password, email } = req.body;
- 
-   try {
-     const hashedPassword = await bcrypt.hash(password, 10);
- 
-    // Insert data to MongoDB
-    await usersCollection.insertOne({
-       username,
-       email,
-       password: hashedPassword,
-     });
+    const { username, password, email } = req.body;
+  
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
 
- 
-     res.status(201).json({ message: "User registered successfully" });
-   } catch (error) {
-     res.status(400).json("Error registering user: " + error.message);
-   }
+      // insert data to MongoDB
+      await usersCollection.insertOne({
+        username,
+        email,
+        password: hashedPassword,
+      });
+
+      res.status(201).json("User registered successfully");
+    } catch (error) {
+      res.status(400).json("Error registering user: " + error.message);
+    }
   });
   
 
-// Create Login Route
+
+//Create Login Route
 app.post("/login", async (req, res) => {
-   const { username, password } = req.body;
- 
-   try {
-     const user = await usersCollection.findOne({ username });
-     if (!user) {
-       return res.status(400).json("Invalid credentials");
-     }
- 
-     // Validate password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-     if (!isPasswordValid) {
-       return res.status(400).json("Invalid credentials");
-     }
- 
-     // Generate JWT
-    const token = jwt.sign(
-       { username: user.username, email: user.email },
-       SECRET_KEY,
-       { expiresIn: "24h" }
-     );
-     res.json({ token });
-   } catch (error) {
-    res.status(500).json({
-      error: true,
-      message: "Failed to fetch flight data",
-      details: error.message,
-    });
-    
-   }
+    const { username, password } = req.body;
+  
+    try {
+      const user = await usersCollection.findOne({ username });
+      if (!user) {
+        return res.status(400).json("Invalid credentials");
+      }
+  
+      // Validate password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(400).json("Invalid credentials");
+      }
+  
+      // generate JWT
+      const token = jwt.sign(
+        { username: user.username, email: user.email },
+        SECRET_KEY,
+        { expiresIn: "24h" }
+      );
+      res.json({ token });
+    } catch (error) {
+      res.status(500).json("Error logging in: " + error.message);
+    }
   });
 
-
-// Protect Routes - Middleware for JWT Verification
+  
+//Protect Routes - Middleware for JWT Verification
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"]; // get Authorization Header
   const token = authHeader && authHeader.split(" ")[1]; // get the token after the Bearer
-
 
   console.log("Token received:", token);//print token(testing)
   console.log("JWT Secret Key:", SECRET_KEY);//print secret key (testing)
@@ -150,25 +135,17 @@ app.get("/api/public-flights", async (req, res) => {
       departure: flight.departure.scheduled,
       arrival: flight.arrival.scheduled,
       status: flight.flight_status,
-      airline: flight.airline.name
     }));
 
     res.json(basicInfo);
   } catch (error) {
     console.error("Error fetching flight data:", error.message);
-    res.status(500).json({
-      error: true,
-      message: "Failed to fetch flight data",
-      details: error.message,
-    });
-    
+    res.status(500).json({ error: "Failed to fetch flight data" });
   }
 });
 
 // protected route: for register user
 app.get("/api/protected-flights", authenticateToken, async (req, res) => {
-  console.log("Request received on /api/protected-flights");
-  console.log("Query params:", req.query);
   const { flightNumber } = req.query;
 
   if (!flightNumber) {
@@ -203,110 +180,69 @@ app.get("/api/protected-flights", authenticateToken, async (req, res) => {
     res.json(detailedInfo);
   } catch (error) {
     console.error("Error fetching flight data:", error.message);
-    res.status(500).json({
-      error: true,
-      message: "Failed to fetch flight data",
-      details: error.message,
-    });
-    
+    res.status(500).json({ error: "Failed to fetch flight data" });
   }
 });
 
-// add flight to "my flight"
+// Add flight to user's "My Flights" list
 app.post("/api/my-flights", authenticateToken, async (req, res) => {
-  const { flightNumber, status, departure, arrival, airline } = req.body;
-  const username = req.user.username;
-  console.log("Authenticated user:", req.user);
+  const { flightNumber, status, departure, arrival, departureAirport, arrivalAirport, airline } = req.body;
 
   try {
-    await usersCollection.updateOne(
+    const username = req.user.username;
+
+    await db.collection("myFlights").updateOne(
       { username },
       {
-        $push: {
-          myFlights: { flightNumber, status, departure, arrival, airline },
-        },
-      }
+        $addToSet: { 
+          flights: { flightNumber, status, departure, arrival, departureAirport, arrivalAirport, airline } 
+        }
+      },
+      { upsert: true }
     );
-    res.status(200).json({ message: "Flight added successfully" });
+
+    res.json({ message: "Flight added successfully to your list" });
   } catch (error) {
-    res.status(500).json({
-      error: true,
-      message: "Failed to fetch flight data",
-      details: error.message,
-    });
-    
+    res.status(500).json({ error: "Failed to add flight: " + error.message });
   }
 });
 
-
-
-// get user's "my flight" list
+// Get user's "My Flights" list
 app.get("/api/my-flights", authenticateToken, async (req, res) => {
-  const username = req.user.username;
-
   try {
-    const user = await usersCollection.findOne({ username });
-    res.status(200).json(user.myFlights || []);
+    const username = req.user.username; // 用戶名來自 token
+
+    const userFlights = await db.collection("myFlights").findOne({ username });
+    console.log("Queried Flights for User:", username, userFlights); // 打印查詢結果
+
+    if (!userFlights) {
+      return res.json({ flights: [] }); // 返回空數組
+    }
+
+    res.json({ flights: userFlights.flights }); // 返回航班清單
   } catch (error) {
-    res.status(500).json({
-      error: true,
-      message: "Failed to fetch flight data",
-      details: error.message,
-    });
-    
+    res.status(500).json({ error: "Failed to fetch your flights: " + error.message });
   }
 });
 
 
-// remove flight from "my flight"
+// Remove a flight from user's "My Flights" list
 app.delete("/api/my-flights", authenticateToken, async (req, res) => {
   const { flightNumber } = req.body;
-  const username = req.user.username;
 
   try {
-    await usersCollection.updateOne(
+    const username = req.user.username;
+
+    await db.collection("myFlights").updateOne(
       { username },
-      { $pull: { myFlights: { flightNumber } } }
+      { $pull: { flights: { flightNumber } } }
     );
-    res.status(200).json({ message: "Flight removed successfully" });
+
+    res.json({ message: "Flight removed successfully from your list" });
   } catch (error) {
-    res.status(500).json({
-      error: true,
-      message: "Failed to fetch flight data",
-      details: error.message,
-    });
-    
+    res.status(500).json({ error: "Failed to remove flight: " + error.message });
   }
 });
-
-// update flight information
-app.put("/api/my-flights", authenticateToken, async (req, res) => {
-  const { flightNumber, status, departure, arrival, airline } = req.body;
-  const username = req.user.username;
-
-  try {
-    await usersCollection.updateOne(
-      { username, "myFlights.flightNumber": flightNumber },
-      {
-        $set: {
-          "myFlights.$.status": status,
-          "myFlights.$.departure": departure,
-          "myFlights.$.arrival": arrival,
-          "myFlights.$.airline": airline,
-        },
-      }
-    );
-    res.status(200).json({ message: "Flight updated successfully" });
-  } catch (error) {
-    res.status(500).json({
-      error: true,
-      message: "Failed to fetch flight data",
-      details: error.message,
-    });
-    
-  }
-});
-
 
 
 
@@ -317,4 +253,3 @@ app.use(express.static(path.join(__dirname, "public")));
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-

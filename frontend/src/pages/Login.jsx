@@ -13,31 +13,39 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // 防止默認表單提交
+  
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/login`, { //replace the uri
+      // 打印表單數據
+      console.log("Form Data:", formData);
+  
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData), // 傳遞表單數據
       });
   
       if (response.ok) {
         const data = await response.json();
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          setMessage("Login successful!");
-          navigate("/");
-        } else {
-          setMessage("Login successful, but no token received!");
-        }
+        console.log("Token received:", data.token); // 打印接收到的 Token
+        localStorage.setItem("token", data.token);
+        setMessage("Login successful!");
+        navigate("/");
       } else {
         const errorData = await response.json();
-        setMessage(errorData.error || "Invalid credentials. Please try again.");
+        console.error("Login failed:", errorData); // 打印錯誤數據
+        setMessage(errorData || "Invalid credentials");
       }
     } catch (error) {
+      console.error("An error occurred:", error.message);
       setMessage("An error occurred. Please try again later.");
     }
   };
+  
+  
+  
   
 
   return (

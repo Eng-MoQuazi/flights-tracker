@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./Register.css"; 
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
+
 const Register = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -19,27 +21,24 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/register`, {
+      const response = await fetch(`${API_BASE_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
-        const responseData = await response.json();
-        setMessage(responseData.message || "Registration successful! You can now login.");
-        setTimeout(() => navigate("/login"), 3000); // 延遲3秒再跳轉
-        setFormData({ username: "", email: "", password: "" }); // 清空表單
+        setMessage("Registration successful! You can now login.");
+        setFormData({ username: "", email: "", password: "" }); // clear the form
+        navigate("/login"); // redirect to login page
       } else {
         const errorData = await response.json();
-        setMessage(errorData.error || "An unexpected error occurred. Please try again.");
+        setMessage("Registration failed: " + errorData.error);
       }
     } catch (error) {
       setMessage("An error occurred. Please try again later.");
     }
   };
-  
-  
 
   return (
     <div className="register-container">

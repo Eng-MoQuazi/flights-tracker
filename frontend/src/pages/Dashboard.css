@@ -6,8 +6,7 @@ body {
 }
 
 .dashboard-container {
-  max-width: 1200px;
-  width: 700px;
+  max-width: 700px;
   margin: 80px auto;
   padding: 30px;
   text-align: center;
@@ -55,11 +54,11 @@ p {
 }
 
 .search-section {
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
 .search-input {
-  width: 50%;
+  width: 60%;
   padding: 10px;
   font-size: 16px;
   margin-right: 10px;
@@ -68,52 +67,68 @@ p {
 }
 
 .search-button {
-  margin-top: 20px;
   padding: 10px 15px;
   font-size: 16px;
   cursor: pointer;
   border: none;
-  background-color: #0056b3
-  ;
+  background-color: #0056b3;
   color: white;
   border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
 .search-button:hover {
   background-color: #007bff;
 }
 
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin: 15px 0;
+}
+
+
 .search-result {
   margin-top: 30px;
-  padding: 15px;
+  padding: 20px;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: #dcecf7;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.clear-button {
+.search-result h3 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.flight-card {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.flight-card p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.add-flight-button {
   margin-top: 10px;
-  margin-left: 20px;;
-  background-color: #1e77bd;
+  padding: 8px 15px;
+  font-size: 14px;
+  background-color: #28a745;
   color: white;
   border: none;
-  padding: 10px 15px;
+  border-radius: 4px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.clear-button:hover {
-  color: #0056b3;
-  background-color: #cbe6f9;
+.add-flight-button:hover {
+  background-color: #218838;
 }
-
-.feedback-message {
-  background-color: #d4edda; /* 成功提示綠色背景 */
-  color: #155724; /* 成功文字顏色 */
-  border: 1px solid #c3e6cb;
-  padding: 10px;
-  margin: 15px 0;
-  border-radius: 5px;
-  text-align: center;
-  font-size: 16px;
-}
-
