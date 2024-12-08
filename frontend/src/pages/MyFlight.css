@@ -1,5 +1,6 @@
 .my-flights-container {
-    max-width: 800px;
+  max-width: 1200px;
+  width: 800px;
     margin: 20px auto;
     padding: 20px;
     background-color: #fff;
@@ -25,6 +26,7 @@
   }
   
   .flight-card {
+    
     padding: 15px;
     margin: 10px 0;
     background-color: #cbe6f9;
@@ -41,7 +43,7 @@
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 14px;
-    background-color: #bfd7ed;
+    background-color: #0056b3;
     color: white;
     border: none;
     border-radius: 4px;
@@ -57,7 +59,7 @@
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 14px;
-    background-color: #003b73;
+    background-color: #0056b3;
     color: white;
     border: none;
     border-radius: 4px;
