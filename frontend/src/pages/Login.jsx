@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./Login.css"; 
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
+
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [message, setMessage] = useState("");
@@ -13,40 +15,27 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // 防止默認表單提交
-  
+    e.preventDefault();
     try {
-      // 打印表單數據
-      console.log("Form Data:", formData);
-  
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API_URL}/login`, {
+      
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData), // 傳遞表單數據
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
         const data = await response.json();
-        console.log("Token received:", data.token); // 打印接收到的 Token
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.token); // save token
         setMessage("Login successful!");
-        navigate("/");
+        navigate("/"); // redirect to dashboard
       } else {
-        const errorData = await response.json();
-        console.error("Login failed:", errorData); // 打印錯誤數據
-        setMessage(errorData || "Invalid credentials");
+        setMessage("Invalid credentials. Please try again.");
       }
     } catch (error) {
-      console.error("An error occurred:", error.message);
       setMessage("An error occurred. Please try again later.");
     }
   };
-  
-  
-  
-  
 
   return (
     <div className="login-container">

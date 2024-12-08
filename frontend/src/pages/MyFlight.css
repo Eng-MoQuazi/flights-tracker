@@ -1,0 +1,72 @@
+.my-flights-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #0056b3;
+  }
+  
+  .error-message {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .flight-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .flight-card {
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #cbe6f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .flight-card p {
+    margin: 5px 0;
+  }
+  
+  .flight-card button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 14px;
+    background-color: #bfd7ed;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .flight-card button:hover {
+    background-color: #60a3d9;
+    color:#fff
+  }
+
+  .remove-flight-button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 14px;
+    background-color: #003b73;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .remove-flight-button:hover {
+    background-color: #60a3d9;
+    color: #0056b3;
+  }
+  
