@@ -1,13 +1,22 @@
 
 .nav {
-  background-color: rgb(37, 107, 21); 
+  /*background-color: rgb(37, 107, 21); 
   display: flex; 
   justify-content: center;
   align-items: center; 
   padding: 10px 0;
   margin: 0;
   list-style-type: none; 
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);*/
+  background: linear-gradient(90deg, #004080, #0059b3);
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -19,16 +28,29 @@
 
 
 .nav a {
-  text-decoration: none;
+  /*text-decoration: none;
   color: white; 
   font-weight: bold; 
-  transition: all 0.3s ease; 
+  transition: all 0.3s ease;*/
+  color: white;
+  text-decoration: none;
+  margin: 0 15px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: transform 0.3s ease, color 0.3s ease;
 }
 
 
 .nav a:hover {
-  color: white;
+  /*color: white;
   background-color: #449657; 
   border-radius: 5px; 
-  padding: 5px 10px;
+  padding: 5px 10px;*/
+  color: #80d4ff;
+  transform: scale(1.2);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.nav a.active {
+  border-bottom: 2px solid #80d4ff;
 }

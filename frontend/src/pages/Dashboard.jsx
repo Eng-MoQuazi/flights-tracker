@@ -101,8 +101,8 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <h1>Welcome to Flight Tracker</h1>
-      <p>Track your flights and manage your travel with ease!</p>
+      <h1>Welcome to Flights Tracker</h1>
+      <p>Keep an eye on your flights!</p>
 
       {}
       <div className="search-section">
@@ -139,6 +139,7 @@ const Dashboard = () => {
                 {flight.arrivalAirport && (
                   <p><strong>Arrival Airport:</strong> {flight.arrivalAirport}</p>
                 )}
+                <p><strong>Airline:</strong> {flight.airline}</p>
                 <button onClick={() => addToMyFlights(flight)} className="add-flight-button">
                   Add to My Flights
                 </button>
