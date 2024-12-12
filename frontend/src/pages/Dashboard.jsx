@@ -13,40 +13,53 @@ const Dashboard = () => {
 
   // search flight
   const handleSearch = async () => {
+    console.log("Search initiated for flight:", flightNumber); // 確認函數被觸發
+  
     if (!flightNumber) {
       alert("Please enter a flight number!");
       return;
     }
-
+  
     try {
-      const token = localStorage.getItem("token"); // get JWT token
-      const isLoggedIn = !!token; // check if it is log in
-
+      const token = localStorage.getItem("token"); // 獲取 JWT token
+      console.log("JWT Token:", token); // 確認是否獲取到 token
+  
+      const isLoggedIn = !!token; // 確認是否已登入
+      console.log("Is Logged In:", isLoggedIn); // 打印登入狀態
+  
       const endpoint = isLoggedIn
         ? `${API_BASE_URL}/api/protected-flights`
         : `${API_BASE_URL}/api/public-flights`;
-
+      console.log("API Endpoint:", endpoint); // 確認正確的 API 路徑
+  
       const options = {
         method: "GET",
         headers: isLoggedIn
           ? { Authorization: `Bearer ${token}` }
           : {},
       };
-
+      console.log("Request Options:", options); // 打印請求選項
+  
       const response = await fetch(`${endpoint}?flightNumber=${flightNumber}`, options);
-
+      console.log("Response Status:", response.status); // 打印 API 響應狀態
+  
       if (!response.ok) {
+        console.error("API Error Response:", response); // 打印錯誤響應
         throw new Error("Flight not found or unauthorized!");
       }
-
+  
       const data = await response.json();
+      console.log("API Response Data:", data); // 打印 API 響應數據
+  
       setSearchResult(data);
       setError("");
     } catch (error) {
+      console.error("Error in handleSearch:", error.message); // 打印錯誤信息
       setError(error.message);
       setSearchResult(null);
     }
   };
+  
 
   // add flights to "My Flights"
   const addToMyFlights = async (flight) => {

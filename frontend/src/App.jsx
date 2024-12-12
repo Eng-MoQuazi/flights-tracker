@@ -12,7 +12,7 @@ import "./App.css";
 const App = () => {
   return (
     <>
-    <img class="logo" src={logo} alt='logo'/>
+    <img className="logo" src={logo} alt='logo'/>
     <Router>
       <Navbar />
       <Routes>

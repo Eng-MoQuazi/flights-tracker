@@ -109,9 +109,11 @@ app.get("/api/dashboard", authenticateToken, async (req, res) => {
 //flight information from AS API
 // public route: for unregister user
 app.get("/api/public-flights", async (req, res) => {
+  console.log("Request received on /api/public-flights with query:", req.query); // 打印請求參數
   const { flightNumber } = req.query;
 
   if (!flightNumber) {
+    console.log("No flight number provided");
     return res.status(400).json({ error: "Flight number is required" });
   }
 
@@ -123,28 +125,32 @@ app.get("/api/public-flights", async (req, res) => {
       },
     });
 
+    console.log("AviationStack API Response:", response.data); // 打印完整響應數據
     const flights = response.data.data;
 
     if (!flights || flights.length === 0) {
+      console.log("No flights found for:", flightNumber);
       return res.status(404).json({ error: "No flight found for the given number" });
     }
 
-    // fetch back basic flight infomation
     const basicInfo = flights.map((flight) => ({
-      flightNumber: flight.flight.iata,
-      departure: flight.departure.scheduled,
-      arrival: flight.arrival.scheduled,
-      status: flight.flight_status,
+      flightNumber: flight.flight?.iata || "Unknown",
+      departure: flight.departure?.scheduled || "Unknown",
+      arrival: flight.arrival?.scheduled || "Unknown",
+      status: flight.flight_status || "Unknown",
       longitude: flight.live?.longitude || null,
       latitude: flight.live?.latitude || null,
+      airline: flight.airline?.name || "Unknown",
     }));
 
+    console.log("Mapped Basic Info:", basicInfo);
     res.json(basicInfo);
   } catch (error) {
     console.error("Error fetching flight data:", error.message);
     res.status(500).json({ error: "Failed to fetch flight data" });
   }
 });
+
 
 // protected route: for register user
 app.get("/api/protected-flights", authenticateToken, async (req, res) => {
