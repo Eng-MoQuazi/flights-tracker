@@ -109,7 +109,6 @@ app.get("/api/dashboard", authenticateToken, async (req, res) => {
 //flight information from AS API
 // public route: for unregister user
 app.get("/api/public-flights", async (req, res) => {
-  console.log("Request received on /api/public-flights with query:", req.query); // 打印請求參數
   const { flightNumber } = req.query;
 
   if (!flightNumber) {
@@ -125,7 +124,6 @@ app.get("/api/public-flights", async (req, res) => {
       },
     });
 
-    console.log("AviationStack API Response:", response.data); // 打印完整響應數據
     const flights = response.data.data;
 
     if (!flights || flights.length === 0) {
@@ -220,16 +218,16 @@ app.post("/api/my-flights", authenticateToken, async (req, res) => {
 // Get user's "My Flights" list
 app.get("/api/my-flights", authenticateToken, async (req, res) => {
   try {
-    const username = req.user.username; // 用戶名來自 token
+    const username = req.user.username;
 
     const userFlights = await db.collection("myFlights").findOne({ username });
-    console.log("Queried Flights for User:", username, userFlights); // 打印查詢結果
+    console.log("Queried Flights for User:", username, userFlights); 
 
     if (!userFlights) {
-      return res.json({ flights: [] }); // 返回空數組
+      return res.json({ flights: [] }); 
     }
 
-    res.json({ flights: userFlights.flights }); // 返回航班清單
+    res.json({ flights: userFlights.flights }); 
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch your flights: " + error.message });
   }
