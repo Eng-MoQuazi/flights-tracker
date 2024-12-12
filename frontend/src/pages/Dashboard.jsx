@@ -22,15 +22,12 @@ const Dashboard = () => {
   
     try {
       const token = localStorage.getItem("token"); 
-      console.log("JWT Token:", token); 
   
       const isLoggedIn = !!token;
-      console.log("Is Logged In:", isLoggedIn);
   
       const endpoint = isLoggedIn
         ? `${API_BASE_URL}/api/protected-flights`
         : `${API_BASE_URL}/api/public-flights`;
-      console.log("API Endpoint:", endpoint); 
   
       const options = {
         method: "GET",
@@ -38,10 +35,8 @@ const Dashboard = () => {
           ? { Authorization: `Bearer ${token}` }
           : {},
       };
-      console.log("Request Options:", options);
   
       const response = await fetch(`${endpoint}?flightNumber=${flightNumber}`, options);
-      console.log("Response Status:", response.status); 
   
       if (!response.ok) {
         console.error("API Error Response:", response); 
@@ -49,7 +44,6 @@ const Dashboard = () => {
       }
   
       const data = await response.json();
-      console.log("API Response Data:", data); 
   
       setSearchResult(data);
       setError("");

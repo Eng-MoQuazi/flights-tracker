@@ -141,7 +141,6 @@ app.get("/api/public-flights", async (req, res) => {
       airline: flight.airline?.name || "Unknown",
     }));
 
-    console.log("Mapped Basic Info:", basicInfo);
     res.json(basicInfo);
   } catch (error) {
     console.error("Error fetching flight data:", error.message);
